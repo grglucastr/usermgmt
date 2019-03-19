@@ -1,6 +1,6 @@
 .buildpath
-.project
-.settings/
+roject
+	.settings/
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -10,7 +10,3 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
-
-###> symfony/web-server-bundle ###
-/.web-server-pid
-###< symfony/web-server-bundle ###

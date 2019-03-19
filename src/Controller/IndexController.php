@@ -36,7 +36,9 @@ class IndexController extends AbstractController
      */
     public function userAdd()
     {
-        return new Response("Show user add form");
+        return $this->render('users/uform.html.twig',[
+            
+        ]);
     }
     
     /**
@@ -63,7 +65,9 @@ class IndexController extends AbstractController
     
     public function groupsAdd() 
     {
-        return new Response("Add group");
+        return $this->render('groups/gform.html.twig',[
+            
+        ]);
     }
   
 }

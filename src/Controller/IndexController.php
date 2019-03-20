@@ -29,8 +29,11 @@ class IndexController extends AbstractController
      */
     public function users()
     {
+        $repo = $this->getDoctrine()->getRepository(User::class);
+        $users = $repo->findAll();
+        
         return $this->render('users/users.html.twig', [
-            
+            "users" => $users
         ]);
     }
     

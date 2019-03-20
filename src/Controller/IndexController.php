@@ -43,7 +43,7 @@ class IndexController extends AbstractController
     public function userAdd()
     {
         return $this->render('users/uform.html.twig',[
-            
+            'user' => new User()
         ]);
     }
     
@@ -67,7 +67,13 @@ class IndexController extends AbstractController
      */
     public function userEdit($userId)
     {
-        return new Response("Load user info and edit");
+        $repo = $this->getDoctrine()->getRepository(User::class);
+        $user = $repo->findOneBy(['id' => $userId]);
+        
+        return $this->render('users/uform.html.twig',[
+            "user" => $user    
+        ]);
+        
     }
     
     /**
@@ -89,7 +95,7 @@ class IndexController extends AbstractController
     
     public function groupsForm()
     {
-        
+           
         return $this->render('groups/gform.html.twig',[
             
         ]);

@@ -73,7 +73,23 @@ class IndexController extends AbstractController
         return $this->render('users/uform.html.twig',[
             "user" => $user    
         ]);
+    }
+    
+    /**
+     * @Route("/users/{userId}/delete", name="form_delete_user", methods={"POST"})
+     * */
+    public function deleteUser($userId)
+    {
+        $repo = $this->getDoctrine()->getRepository(User::class);
+        $user = $repo->findOneBy(['id' => $userId]);
         
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($user);
+        $em->flush();
+        
+        $arrResponse = ['done' => true];
+        
+        return $this->json($arrResponse);
     }
     
     /**

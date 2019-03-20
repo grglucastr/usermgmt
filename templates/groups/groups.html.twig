@@ -4,24 +4,25 @@
 
 {% block body %}
 
+
 <div class="row">
-	<div class="col">
-		<h2 class="mt-3">Groups</h2>	
+	<div class="col-sm-12 col-md-4">
+		<h4 class="mt-4">Groups Available ({{ groups|length }})
+		<a href="/groups/add" class="btn btn-primary mt-3">Add Group</a></h4>
+		<div class="list-group">
+			{% for group in groups %}
+			<a href="#" class="list-group-item list-group-item-action">
+			    {{ group.groupName }}
+			     <span class="badge badge-primary badge-pill">2</span>
+			</a>
+			{% endfor %}
+		</div>
 	</div>
 </div>
 
-<div class="row">
-	<div class="col">
-		<a href="/groups/add" class="btn btn-primary mt-3">Add Group</a>
-	</div>
-</div>
+{% endblock %}
 
-<div class="row">
-	<div class="col">
-		<h4 class="mt-4">Groups List</h4>
-	</div>
-</div>
-
-
-
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/groups.js') }}"></script>
 {% endblock %}

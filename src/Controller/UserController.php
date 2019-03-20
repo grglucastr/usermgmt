@@ -9,7 +9,7 @@ class UserController extends AbstractController
 {
     
     /**
-     * @Route("/api/users")
+     * @Route("/api/users", name="api_users")
      */
     
     public function index(){

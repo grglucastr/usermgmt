@@ -18,6 +18,34 @@ class UserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, User::class);
     }
+    
+    public function findUsersWhereNotInGroup($groupId)
+    {
+        $subQueryBuilder = $this->_em->createQueryBuilder();
+        
+        $subQuery = $subQueryBuilder->select(['us.id'])
+                                    ->from('App\Entity\User', 'us')
+                                    ->innerJoin('us.ugroups', 'g')
+                                    ->where('g.id = :group_id')
+                                    ->setParameter('group_id', $groupId)
+                                    ->getQuery()
+                                    ->getResult();
+        
+        if(count($subQuery) == 0){
+            return $this->createQueryBuilder('u')->getQuery()->getResult();
+        }
+        
+        $queryBuilder = $this->_em->createQueryBuilder();
+        
+        $query = $queryBuilder->select('u')
+                              ->from('App\Entity\User', 'u')
+                              ->where($queryBuilder->expr()->notIn('u.id', ':subQuery'))
+                              ->setParameter('subQuery', $subQuery)
+                              ->getQuery();
+        
+        return $query->getResult();
+        
+    }
 
     // /**
     //  * @return User[] Returns an array of User objects

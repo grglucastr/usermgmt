@@ -189,9 +189,38 @@ class IndexController extends AbstractController
         $repo = $this->getDoctrine()->getRepository(Group::class);
         $group = $repo->find($groupId);
         
+        $uRepo = $this->getDoctrine()->getRepository(User::class);
+        $users = $uRepo->findUsersWhereNotInGroup($groupId);
+     
+        $usersAvailable = count($users) > 0;
+        
         return $this->render('groups/group_details.html.twig', [
-            "group" => $group
+            "group" => $group,
+            "users" => $users,
+            "usersAvailable" => $usersAvailable
         ]);
+
+    }
+    
+    /**
+     * @Route("/groups/{groupId}/users", name="form_group_user_bind", methods={"POST"})
+     * */
+    public function groupAddUser(Request $request, $groupId)
+    {
+        $uRepo = $this->getDoctrine()->getRepository(User::class);
+        $user = $uRepo->find($request->get("user"));
+        
+        $gRepo = $this->getDoctrine()->getRepository(Group::class);
+        $group = $gRepo->find($groupId);
+        
+        $group->addUser($user);
+        
+        $em = $this->getDoctrine()->getManager();
+        $em->merge($group);
+        $em->flush();
+        
+        $url = "/groups/".$groupId;
+        return $this->redirect($url);
     }
     
     

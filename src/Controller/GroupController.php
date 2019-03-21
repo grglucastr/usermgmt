@@ -36,4 +36,19 @@ class GroupController extends AbstractController
         
         return $this->json($group);
     }
+    
+    /**
+     * @Route("/api/groups/{groupId}", name="api_delete_group", methods={"DELETE"})
+     */
+    public function deleteGroup($groupId)
+    {
+        $repo = $this->getDoctrine()->getRepository(Group::class);
+        $group = $repo->find($groupId);
+        
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($group);
+        $em->flush();
+        
+        return $this->json(["done" => true]);
+    }
 }

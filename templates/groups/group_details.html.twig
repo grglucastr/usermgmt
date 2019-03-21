@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Group Details{% endblock %}
+
+{% block body %}
+
+<div class="row">
+	<div class="col">
+		<h4 class="mt-4">{{ group.groupname }} Users({{ group.users|length}})</h4>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-sm-12 col-md-5">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>User Name</th>
+					<th></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				{% for user in group.users %}
+				<tr>
+					<td>{{ user.username }}</td>
+					<td>
+						<a href="#" class="rmv-user-group" data-groupid="{{ group.id }}" data-userid="{{ user.id }}">
+							Remove from Group
+						</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{% endblock %}
+
+
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/usersgroups.js') }}"></script>
+{% endblock %}

@@ -30,6 +30,9 @@ class GroupRepository extends ServiceEntityRepository
                                     ->setParameter('user_id', $userId)
                                     ->getQuery()->getResult();
         
+        if(count($subQuery) == 0){
+            return $this->createQueryBuilder('g')->getQuery()->getResult();
+        }
         
         $queryBuilder = $this->_em->createQueryBuilder();
         $query = $queryBuilder->select('g')

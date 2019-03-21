@@ -8,15 +8,43 @@
 <div class="row">
 	<div class="col-sm-12 col-md-4">
 		<h4 class="mt-4">Groups Available ({{ groups|length }})
-		<a href="/groups/add" class="btn btn-primary mt-3">Add Group</a></h4>
-		<div class="list-group">
-			{% for group in groups %}
-			<a href="#" class="list-group-item list-group-item-action">
-			    {{ group.groupName }}
-			     <span class="badge badge-primary badge-pill">2</span>
-			</a>
-			{% endfor %}
-		</div>
+		<a href="{{ path('form_group') }}" class="btn btn-primary mt-3">Add Group</a></h4>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-5">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Group Name</th>
+					<th class="text-center">Users</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				{% for group in groups %}
+				<tr>
+					<td>{{ group.groupname }}</td>
+					<td class="text-center">{{ group.users|length }}</td>
+					<td>
+						<a href="/groups/{{ group.id }}/">List Users</a>
+					</td>
+					<td class="text-center">
+						{% if(group.users|length == 0) %}
+						<a href="#" class="rmv-group" data-groupid="{{ group.id }}">
+							Remove Group
+						</a>
+						{% else %}
+						-
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 	</div>
 </div>
 

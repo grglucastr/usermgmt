@@ -102,7 +102,7 @@ class IndexController extends AbstractController
         
         $gRepo = $this->getDoctrine()->getRepository(Group::class);
         $groups = $gRepo->findGroupsWhereUserIsNotIn($userId);
-        
+       
         $groupsAvailable = count($groups) > 0;
                
         
@@ -112,30 +112,7 @@ class IndexController extends AbstractController
             "groupsAvailable" => $groupsAvailable
         ]);
     }
-    
-    /** 
-     * @Route("/users/{userId}/groups/{groupId}/remove", name="form_remove_user_from_group", methods={"GET"} ) 
-     * 
-     * */
-    public function removeUserFromGroup($userId, $groupId)
-    {
-        $uRepo = $this->getDoctrine()->getRepository(User::class);
-        $user = $uRepo->find($userId);
         
-        $gRepo = $this->getDoctrine()->getRepository(Group::class);
-        $group = $gRepo->find($groupId);
-        
-        $user->removeUgroup($group);
-        
-        $em = $this->getDoctrine()->getManager();
-        $em->merge($user);
-        $em->flush();
-        
-        $url = "/users/".$userId."/groups";
-        
-        return $this->redirect($url);
-    }
-    
     
     /**
      * @Route("/users/{userId}/groups", name="form_save_user_to_group", methods={"POST"})
@@ -171,17 +148,22 @@ class IndexController extends AbstractController
         ]);
     }
     
+    
+   
+    
     /**
-     * @Route("/groups/add", methods={"GET"})
+     * @Route("/groups/add", name="form_group", methods={"GET"})
      */
     
     public function groupsForm()
     {
            
         return $this->render('groups/gform.html.twig',[
-            
+           "group" => new Group()
         ]);
     }
+    
+    
     
     /**
      * @Route("/groups/add", methods={"POST"})
@@ -196,6 +178,20 @@ class IndexController extends AbstractController
         $em->flush();
         
         return $this->redirect("/groups");
+    }
+    
+    
+    /**
+     * @Route("/groups/{groupId}", name="form_group_details", methods={"GET"})
+     */
+    public function groupDetails($groupId)
+    {
+        $repo = $this->getDoctrine()->getRepository(Group::class);
+        $group = $repo->find($groupId);
+        
+        return $this->render('groups/group_details.html.twig', [
+            "group" => $group
+        ]);
     }
     
     

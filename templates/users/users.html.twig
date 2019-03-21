@@ -21,7 +21,6 @@
 	 			<th>Groups</th>
 	 			<th></th>
 	 			<th></th>
-	 			<th></th>
 	 		</thead>
 	 		
 	 		<tbody>
@@ -30,7 +29,6 @@
 	 				<td>{{ user.username }}</td>
 	 				<td class="text-center">{{ user.ugroups|length }}</td>
 	 				<td><a href="/users/{{ user.id }}/groups">Manage Groups</a></td>
-	 				<td><a href="/users/{{ user.id }}/edit">Edit</a></td>
 	 				<td><a href="#" class="delete" data-id={{ user.id }}>Delete</a></td>
 	 			</tr>
 	 			{% endfor %}

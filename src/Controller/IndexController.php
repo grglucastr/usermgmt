@@ -93,6 +93,72 @@ class IndexController extends AbstractController
     }
     
     /**
+     * @Route("/users/{userId}/groups", name="form_show_user_to_group", methods={"GET"})
+     * */
+    public function userGroups($userId)
+    {
+        $uRepo = $this->getDoctrine()->getRepository(User::class);
+        $user = $uRepo->find($userId);
+        
+        $gRepo = $this->getDoctrine()->getRepository(Group::class);
+        $groups = $gRepo->findGroupsWhereUserIsNotIn($userId);
+        
+        $groupsAvailable = count($groups) > 0;
+               
+        
+        return $this->render('users/usergroups.html.twig', [
+            "user" => $user,
+            "groups" => $groups,
+            "groupsAvailable" => $groupsAvailable
+        ]);
+    }
+    
+    /** 
+     * @Route("/users/{userId}/groups/{groupId}/remove", name="form_remove_user_from_group", methods={"GET"} ) 
+     * 
+     * */
+    public function removeUserFromGroup($userId, $groupId)
+    {
+        $uRepo = $this->getDoctrine()->getRepository(User::class);
+        $user = $uRepo->find($userId);
+        
+        $gRepo = $this->getDoctrine()->getRepository(Group::class);
+        $group = $gRepo->find($groupId);
+        
+        $user->removeUgroup($group);
+        
+        $em = $this->getDoctrine()->getManager();
+        $em->merge($user);
+        $em->flush();
+        
+        $url = "/users/".$userId."/groups";
+        
+        return $this->redirect($url);
+    }
+    
+    
+    /**
+     * @Route("/users/{userId}/groups", name="form_save_user_to_group", methods={"POST"})
+     * */
+    public function userAddToGroup(Request $request, $userId)
+    {
+        $gRepo = $this->getDoctrine()->getRepository(Group::class);
+        $group = $gRepo->find($request->get("group"));
+        
+        $uRepo = $this->getDoctrine()->getRepository(User::class);
+        $user = $uRepo->find($userId);
+        
+        $user->addUgroup($group);
+        
+        $em = $this->getDoctrine()->getManager();
+        $em->merge($user);
+        $em->flush();
+        
+        $url = "/users/".$userId."/groups";
+        return $this->redirect($url);
+    }
+    
+    /**
      * @Route("/groups")
      */
     public function groups()

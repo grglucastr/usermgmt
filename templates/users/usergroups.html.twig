@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Add User to Groups {% endblock  %}
+
+{% block body %}
+<div class="row">
+	<div class="col-sm-5 mt-4">
+		<h3>{{ user.username }} Groups</h3>
+	</div>
+</div>
+
+{% if(groupsAvailable) %}
+<form class="row" method="post" action="/users/{{ user.id }}/groups">
+	<div class="col-sm-2">
+		<select class="form-control mt-4" name="group">
+			{% for group in groups %}
+			<option value="{{ group.id }}">{{ group.groupname }}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="col-sm-3">
+	    
+		<button type="submit" class="btn btn-primary mt-4">
+			Add to Group
+		</button>
+		
+	</div>
+</form>
+{% else %}
+<div class="row">
+	<div class="col">
+		<h5 class="mt-4">There aren't groups available</h5>
+	</div>
+</div>
+
+{% endif %}
+<div class="row">
+	<div class="col-sm-5">
+		<table class="table table-striped mt-4">
+			<thead>
+				<tr>
+					<th>Group Name</th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for ugroup in user.ugroups %}
+				<tr>
+					<td>{{ ugroup.groupname }}</td>
+					<td><a href="#">See Group</a></td>
+					<td>
+						<a href="/users/{{ user.id }}/groups/{{ ugroup.id }}/remove" class="rmv-user-group" data-groupid="{{ ugroup.id }}" data-userid="{{ user.id }}">
+							Remove from Group
+						</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('js/usersgroups.js') }}"></script>
+{% endblock %}
+

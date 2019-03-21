@@ -18,6 +18,29 @@ class GroupRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Group::class);
     }
+    
+    public function findGroupsWhereUserIsNotIn($userId)
+    {   
+        $subQueryBuilder = $this->_em->createQueryBuilder();
+        
+        $subQuery = $subQueryBuilder->select(['gr.id'])
+                                    ->from('App\Entity\Group', 'gr')
+                                    ->innerJoin('gr.users', 'u')
+                                    ->where('u.id = :user_id')
+                                    ->setParameter('user_id', $userId)
+                                    ->getQuery()->getResult();
+        
+        
+        $queryBuilder = $this->_em->createQueryBuilder();
+        $query = $queryBuilder->select('g')
+                              ->from('App\Entity\Group', 'g')
+                              ->where($queryBuilder->expr()->notIn('g.id', ':subQuery'))
+                              ->setParameter('subQuery', $subQuery)
+                              ->getQuery();
+        
+        
+        return $query->getResult();
+    }
 
     // /**
     //  * @return Group[] Returns an array of Group objects

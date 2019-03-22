@@ -80,7 +80,7 @@ class User implements \JsonSerializable
     {
         return [
           "id" => $this->id,
-          "username" => $this->username 
+          "username" => $this->username,
         ];
         
     }

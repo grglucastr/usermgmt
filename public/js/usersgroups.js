@@ -16,7 +16,7 @@ $(function(){
 				dataType: 'json'
 			}).done(function(resp){
 				if(resp.done){
-					alert('Remove complete!');
+					alert(resp.done_message);
 					location.reload();
 				}
 			})

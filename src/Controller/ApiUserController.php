@@ -90,42 +90,13 @@ class ApiUserController extends AbstractController
     public function getUserGroups($userIdOrUsername){
         $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
         if(is_object($userFound)){
-            return $this->json($userFound->getUgroups());
+            return $this->json($userFound->getUgroups()->toArray());
         }
         return $this->json($userFound, Response::HTTP_NOT_FOUND);
     }
     
     /**
-     * @Route("/api/users/{$userIdOrUsername}/groups/{groupId}", name="api_remove_user_from_group", methods={"DELETE", "POST"})
-     */
-    public function removeUserFromGroup($userIdOrUsername, $groupId)
-    {
-        $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
-        if (is_object($userFound)) {
-            
-            $apiGroup = new ApiGroupController();
-            $groupFound = $apiGroup->findTheGroup($this->getDoctrine(), $groupId);
-            
-            if(is_object($groupFound)){
-                
-                $userFound->removeUgroup($groupFound);
-                $em = $this->getDoctrine()->getManager();
-                $em->merge($userFound);
-                $em->flush();
-                return $this->json([
-                    "done" => true,
-                    "done_message" => "User removed from group"
-                ], Response::HTTP_OK);
-            }
-            
-            return $this->json($groupFound, Response::HTTP_NOT_FOUND);
-        }
-        return $this->json($userFound, Response::HTTP_NOT_FOUND);
-    }
-    
-    
-    /**
-     * @Route("/api/users/{userIdOrUsername}/groups/{groupId}", name="api_add_user_to_group", methods={"POST", "DELETE"})
+     * @Route("/api/users/{userIdOrUsername}/groups/{groupId}", name="api_add_user_to_group", methods={"POST"})
      */
     public function addUserToGroup($userIdOrUsername, $groupId){
         
@@ -144,6 +115,34 @@ class ApiUserController extends AbstractController
                 return $this->json([
                     "done" => true,
                     "done_message" => "User added to group!"
+                ], Response::HTTP_OK);
+            }
+            
+            return $this->json($groupFound, Response::HTTP_NOT_FOUND);
+        }
+        return $this->json($userFound, Response::HTTP_NOT_FOUND);
+    }
+    
+    /**
+     * @Route("/api/users/{$userIdOrUsername}/groups/{groupId}/remove", name="api_remove_user_from_group", methods={"DELETE"})
+     */
+    public function removeUserFromGroup($userIdOrUsername, $groupId)
+    {
+        $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
+        if (is_object($userFound)) {
+            
+            $apiGroup = new ApiGroupController();
+            $groupFound = $apiGroup->findTheGroup($this->getDoctrine(), $groupId);
+            
+            if(is_object($groupFound)){
+                
+                $userFound->removeUgroup($groupFound);
+                $em = $this->getDoctrine()->getManager();
+                $em->merge($userFound);
+                $em->flush();
+                return $this->json([
+                    "done" => true,
+                    "done_message" => "User removed from group"
                 ], Response::HTTP_OK);
             }
             

@@ -6,49 +6,89 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Group;
 use Symfony\Component\HttpFoundation\Request;
+use App\Entity\User;
 
 
 class GroupController extends AbstractController
 {
     /**
-     * @Route("/api/groups", name="api_list_groups", methods={"GET"})
+     * @Route("/groups")
      */
-    public function index()
-    {   
+    public function groups()
+    {
         $repo = $this->getDoctrine()->getRepository(Group::class);
         $groups = $repo->findAll();
-        return $this->json($groups);
+        
+        return $this->render('groups/groups.html.twig', [
+            "groups" => $groups
+        ]);
     }
     
     /**
-     * @Route("/api/groups", name="api_add_groups", methods={"POST"})
+     * @Route("/groups/add", name="form_group", methods={"GET"})
      */
-    public function addGroup( Request $request )
-    {   
-        $arr = json_decode($request->getContent(), true);        
+    public function groupsForm()
+    {
+        return $this->render('groups/gform.html.twig',[
+            "group" => new Group()
+        ]);
+    }
+    
+    /**
+     * @Route("/groups/add", methods={"POST"})
+     */
+    public function groupsSave(Request $request){
         
         $group = new Group();
-        $group->setGroupName($arr['group_name']);
+        $group->setGroupName($request->get('group_name'));
         
         $em = $this->getDoctrine()->getManager();
         $em->persist($group);
         $em->flush();
         
-        return $this->json($group);
+        return $this->redirect("/groups");
     }
     
     /**
-     * @Route("/api/groups/{groupId}", name="api_delete_group", methods={"DELETE"})
+     * @Route("/groups/{groupId}", name="form_group_details", methods={"GET"})
      */
-    public function deleteGroup($groupId)
+    public function groupDetails($groupId)
     {
         $repo = $this->getDoctrine()->getRepository(Group::class);
         $group = $repo->find($groupId);
         
+        $uRepo = $this->getDoctrine()->getRepository(User::class);
+        $users = $uRepo->findUsersWhereNotInGroup($groupId);
+        
+        $usersAvailable = count($users) > 0;
+        
+        return $this->render('groups/group_details.html.twig', [
+            "group" => $group,
+            "users" => $users,
+            "usersAvailable" => $usersAvailable
+        ]);
+        
+    }
+    
+    /**
+     * @Route("/groups/{groupId}/users", name="form_group_user_bind", methods={"POST"})
+     * */
+    public function groupAddUser(Request $request, $groupId)
+    {
+        $uRepo = $this->getDoctrine()->getRepository(User::class);
+        $user = $uRepo->find($request->get("user"));
+        
+        $gRepo = $this->getDoctrine()->getRepository(Group::class);
+        $group = $gRepo->find($groupId);
+        
+        $group->addUser($user);
+        
         $em = $this->getDoctrine()->getManager();
-        $em->remove($group);
+        $em->merge($group);
         $em->flush();
         
-        return $this->json(["done" => true]);
+        $url = "/groups/".$groupId;
+        return $this->redirect($url);
     }
+    
 }

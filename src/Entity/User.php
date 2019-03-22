@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\Table(name="users")
  */
-class User
+class User implements \JsonSerializable
 {
     /**
      * @ORM\Id()
@@ -43,7 +43,7 @@ class User
      * @return Collection|Group[]
      */
     public function getUgroups(): Collection
-    {
+    {   
         return $this->ugroups;
     }
 
@@ -76,4 +76,13 @@ class User
 
         return $this;
     }
+    public function jsonSerialize()
+    {
+        return [
+          "id" => $this->id,
+          "username" => $this->username 
+        ];
+        
+    }
+
 }

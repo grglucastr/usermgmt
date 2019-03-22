@@ -10,10 +10,10 @@ This is a challenge project applied by [InterNations](https://www.internations.o
 *  [Install Project](#install-project)
 *  [Database](#db)
 	 * [Configuration](#db-config)
-	 * [Create Schema](#db-config)
-	 * [Create Tables](#db-config)
-*  [Running Application](#db)
-*  [API Routes](#routes)
+	 * [Create Database](#db-create)
+	 * [Create Tables](#db-create-tables)
+*  [Running Application](#run-app)
+*  [RESTFul API](#restful-api)
 
 
 ## <a name="docs-and-diagrams"></a>Docs and Diagrams
@@ -49,152 +49,65 @@ Go inside the folder ``` usermgmt ``` and run:
 composer install
 ```
 This will download all the necessary libraries and also provide some bundles.
+Up next, we will be doing some database configurations.
 
-This text you see here is *actually* written in Markdown! To get a feel for Markdown's syntax, type some text into the left window and watch the results in the right.
+## <a name="db"></a>Database
+In this section, we will set the database, create the schema and create the tables. To automate this process, this project counts with the help of the Doctrine ORM.
 
-### Tech
+### <a name="db-config"></a>Configuration
+Update the ```.env``` file with your database configuration. Find the following line and update it with your database information:
 
-Dillinger uses a number of open source projects to work properly:
+```
+DATABASE_URL=mysql://db_user:db_password@127.0.0.1:3306/db_name
+```
+ In the URI above, for the database name ```db_name``` you can pick whatever fits better for you.
+ 
+ ### <a name="db-create"></a>Create Database
+ 
+ In order to create the database, run the following command on your terminal:
+ ```
+./bin/console doctrine:database:create
+```
+This will create the schema where the tables will be lay on it.
 
-* [AngularJS] - HTML enhanced for web apps!
-* [Ace Editor] - awesome web-based text editor
-* [markdown-it] - Markdown parser done right. Fast and easy to extend.
-* [Twitter Bootstrap] - great UI boilerplate for modern web apps
-* [node.js] - evented I/O for the backend
-* [Express] - fast node.js network app framework [@tjholowaychuk]
-* [Gulp] - the streaming build system
-* [Breakdance](http://breakdance.io) - HTML to Markdown converter
-* [jQuery] - duh
+### <a name="db-create-tables"></a>Create Tables
 
-And of course Dillinger itself is open source with a [public repository][dill]
- on GitHub.
+To create all the tables on the database, run the following command on your terminal:
+ ```
+./bin/console doctrine:migrations:migrate
+```
+This will run all the migrations and install all the tables on your database.
 
-### Installation
+## <a name="run-app"></a>Running Application
 
-Dillinger requires [Node.js](https://nodejs.org/) v4+ to run.
+After all the configuration, now lets run the app. In your terminal type the following command:
+ ```
+./bin/console server:run
+```
+and then access the URL through your browser to see the forms and pages.
 
-Install the dependencies and devDependencies and start the server.
+## <a name="restful-api"></a>RESTFul API
 
-```sh
-$ cd dillinger
-$ npm install -d
-$ node app
+The User Management System provides some endpoints to be consumed by others clients such as mobile app. All of the paths provide content in JSON. 
+
+The table below describes the routes available. You can also list them by typing in your terminal:
+
+ ```
+./bin/console debug:router
 ```
 
-For production environments...
+| Method | Path | Description | Input Example |
+| ------ | ------ | ------ | ------ |
+| GET | /api/groups |List all groups from database | - |
+| GET | /api/groups/{groupId} | Get a specific group by its ID | - |
+| POST | /api/groups | Adds a new group to database | {"group_name": "Cooking"} |
+| DELETE | /api/groups/{groupId} |Deletes a group from database if it doesn't contains any user.| - |
+| GET | /api/groups/{groupId}/users  |Lists all the users from a specific group with its ID passed by URL parameter.| - |
+| GET | /api/users | List all users from database | - | 
+| POST | /api/users | Adds a new user to database. The username attribute is unique. If the same username is added more than once, than an error object is returned. | {"username": "grglucastr"} |
+| GET | /api/users/{userIdOrUsername} | Get a specific user by passing its ID or its username to the URL parameter.  i.g.: ```/api/users/1``` or ```/api/users/grglucastr```|-|
+| DELETE | /api/users/{userIdOrUsername}  | Delete a user from database by passing its ID or username | - |
+| GET | /api/users/{userIdOrUsername}/groups/ | List all the groups that the user is attached to it | - |
+| POST | /api/users/{userIdOrUsername}/groups/{groupId} | Adds a user to a specific group
+| DELETE | /api/users/{userIdOrUsername}/groups/{groupId} | Removes a user from a specific group | - |
 
-```sh
-$ npm install --production
-$ NODE_ENV=production node app
-```
-
-### Plugins
-
-Dillinger is currently extended with the following plugins. Instructions on how to use them in your own application are linked below.
-
-| Plugin | README |
-| ------ | ------ |
-| Dropbox | [plugins/dropbox/README.md][PlDb] |
-| Github | [plugins/github/README.md][PlGh] |
-| Google Drive | [plugins/googledrive/README.md][PlGd] |
-| OneDrive | [plugins/onedrive/README.md][PlOd] |
-| Medium | [plugins/medium/README.md][PlMe] |
-| Google Analytics | [plugins/googleanalytics/README.md][PlGa] |
-
-
-### Development
-
-Want to contribute? Great!
-
-Dillinger uses Gulp + Webpack for fast developing.
-Make a change in your file and instantanously see your updates!
-
-Open your favorite Terminal and run these commands.
-
-First Tab:
-```sh
-$ node app
-```
-
-Second Tab:
-```sh
-$ gulp watch
-```
-
-(optional) Third:
-```sh
-$ karma test
-```
-#### Building for source
-For production release:
-```sh
-$ gulp build --prod
-```
-Generating pre-built zip archives for distribution:
-```sh
-$ gulp build dist --prod
-```
-### Docker
-Dillinger is very easy to install and deploy in a Docker container.
-
-By default, the Docker will expose port 8080, so change this within the Dockerfile if necessary. When ready, simply use the Dockerfile to build the image.
-
-```sh
-cd dillinger
-docker build -t joemccann/dillinger:${package.json.version} .
-```
-This will create the dillinger image and pull in the necessary dependencies. Be sure to swap out `${package.json.version}` with the actual version of Dillinger.
-
-Once done, run the Docker image and map the port to whatever you wish on your host. In this example, we simply map port 8000 of the host to port 8080 of the Docker (or whatever port was exposed in the Dockerfile):
-
-```sh
-docker run -d -p 8000:8080 --restart="always" <youruser>/dillinger:${package.json.version}
-```
-
-Verify the deployment by navigating to your server address in your preferred browser.
-
-```sh
-127.0.0.1:8000
-```
-
-#### Kubernetes + Google Cloud
-
-See [KUBERNETES.md](https://github.com/joemccann/dillinger/blob/master/KUBERNETES.md)
-
-
-### Todos
-
- - Write MORE Tests
- - Add Night Mode
-
-License
-----
-
-MIT
-
-
-**Free Software, Hell Yeah!**
-
-[//]: # (These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax)
-
-
-   [dill]: <https://github.com/joemccann/dillinger>
-   [git-repo-url]: <https://github.com/joemccann/dillinger.git>
-   [john gruber]: <http://daringfireball.net>
-   [df1]: <http://daringfireball.net/projects/markdown/>
-   [markdown-it]: <https://github.com/markdown-it/markdown-it>
-   [Ace Editor]: <http://ace.ajax.org>
-   [node.js]: <http://nodejs.org>
-   [Twitter Bootstrap]: <http://twitter.github.com/bootstrap/>
-   [jQuery]: <http://jquery.com>
-   [@tjholowaychuk]: <http://twitter.com/tjholowaychuk>
-   [express]: <http://expressjs.com>
-   [AngularJS]: <http://angularjs.org>
-   [Gulp]: <http://gulpjs.com>
-
-   [PlDb]: <https://github.com/joemccann/dillinger/tree/master/plugins/dropbox/README.md>
-   [PlGh]: <https://github.com/joemccann/dillinger/tree/master/plugins/github/README.md>
-   [PlGd]: <https://github.com/joemccann/dillinger/tree/master/plugins/googledrive/README.md>
-   [PlOd]: <https://github.com/joemccann/dillinger/tree/master/plugins/onedrive/README.md>
-   [PlMe]: <https://github.com/joemccann/dillinger/tree/master/plugins/medium/README.md>
-   [PlGa]: <https://github.com/RahulHP/dillinger/blob/master/plugins/googleanalytics/README.md>

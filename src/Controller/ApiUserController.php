@@ -6,9 +6,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\User;
-use App\Entity\Group;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\NoResultException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 class ApiUserController extends AbstractController
 {
@@ -33,11 +34,20 @@ class ApiUserController extends AbstractController
         $user = new User();
         $user->setUsername($arrRequest['username']);
         
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($user);
-        $em->flush();
-        
-        return $this->json($user, Response::HTTP_CREATED);
+        try {
+            
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+            return $this->json($user, Response::HTTP_CREATED);
+            
+        } catch (UniqueConstraintViolationException $e) {
+            
+            return $this->json([
+                "error" => true,
+                "error_message" => "Username already in use.",
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
     
     /**
@@ -45,7 +55,7 @@ class ApiUserController extends AbstractController
      */
     public function getUserById($userIdOrUsername)
     {
-        $userFound = $this->findTheUser($userIdOrUsername);
+        $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
         if(is_object($userFound)){
             return $this->json($userFound);
         }
@@ -58,7 +68,7 @@ class ApiUserController extends AbstractController
      */
     public function deleteUserById($userIdOrUsername)
     {
-        $userFound = $this->findTheUser($userIdOrUsername);
+        $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
         
         if(is_object($userFound)){
             $em = $this->getDoctrine()->getManager();
@@ -74,44 +84,78 @@ class ApiUserController extends AbstractController
         return $this->json($userFound, Response::HTTP_NOT_FOUND);        
     }
     
+    /**
+     * @Route("/api/users/{userIdOrUsername}/groups/", name="api_list_user_groups", methods={"GET"})
+     */
+    public function getUserGroups($userIdOrUsername){
+        $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
+        if(is_object($userFound)){
+            return $this->json($userFound->getUgroups());
+        }
+        return $this->json($userFound, Response::HTTP_NOT_FOUND);
+    }
     
     /**
-     * @Route("/api/users/{userIdOrUsername}/groups/{groupId}", name="api_add_user_to_group", methods={"POST"})
+     * @Route("/api/users/{$userIdOrUsername}/groups/{groupId}", name="api_remove_user_from_group", methods={"DELETE", "POST"})
+     */
+    public function removeUserFromGroup($userIdOrUsername, $groupId)
+    {
+        $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
+        if (is_object($userFound)) {
+            
+            $apiGroup = new ApiGroupController();
+            $groupFound = $apiGroup->findTheGroup($this->getDoctrine(), $groupId);
+            
+            if(is_object($groupFound)){
+                
+                $userFound->removeUgroup($groupFound);
+                $em = $this->getDoctrine()->getManager();
+                $em->merge($userFound);
+                $em->flush();
+                return $this->json([
+                    "done" => true,
+                    "done_message" => "User removed from group"
+                ], Response::HTTP_OK);
+            }
+            
+            return $this->json($groupFound, Response::HTTP_NOT_FOUND);
+        }
+        return $this->json($userFound, Response::HTTP_NOT_FOUND);
+    }
+    
+    
+    /**
+     * @Route("/api/users/{userIdOrUsername}/groups/{groupId}", name="api_add_user_to_group", methods={"POST", "DELETE"})
      */
     public function addUserToGroup($userIdOrUsername, $groupId){
         
-        
+        $userFound = $this->findTheUser($this->getDoctrine(), $userIdOrUsername);
+        if (is_object($userFound)) {
+            
+            $apiGroup = new ApiGroupController();
+            $groupFound = $apiGroup->findTheGroup($this->getDoctrine(), $groupId);
+                        
+            if(is_object($groupFound)){
+                
+                $userFound->addUgroup($groupFound);
+                $em = $this->getDoctrine()->getManager();
+                $em->merge($userFound);
+                $em->flush();
+                return $this->json([
+                    "done" => true,
+                    "done_message" => "User added to group!"
+                ], Response::HTTP_OK);
+            }
+            
+            return $this->json($groupFound, Response::HTTP_NOT_FOUND);
+        }
+        return $this->json($userFound, Response::HTTP_NOT_FOUND);
     }
-    
-    
    
-    
-    
-    /**
-     * @Route("/api/users/{userId}/groups/{groupId}", name="api_remove_user_from_group", methods={"DELETE"})
-     */
-    public function removeUserFromGroup($userId, $groupId)
-    {
-        $uRepo = $this->getDoctrine()->getRepository(User::class);
-        $user = $uRepo->find($userId);
-        
-        $gRepo = $this->getDoctrine()->getRepository(Group::class);
-        $group = $gRepo->find($groupId);
-        
-        $user->removeUgroup($group);
-        
-        $em = $this->getDoctrine()->getManager();
-        $em->merge($user);
-        $em->flush();
-        
-        return $this->json(["done" => true]);
-    }
-    
-    
-    private function findTheUser($userIdOrUsername){
+    public function findTheUser(ManagerRegistry $doctrine,  $userIdOrUsername){
         try{
             
-            $urepo = $this->getDoctrine()->getRepository(User::class);
+            $urepo = $doctrine->getRepository(User::class);
             $user = $urepo->findByUserIdOrUserName($userIdOrUsername);
             return $user;
             

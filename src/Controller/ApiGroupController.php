@@ -6,6 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Group;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\NoResultException;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 class ApiGroupController extends AbstractController
 {
@@ -49,5 +51,20 @@ class ApiGroupController extends AbstractController
         $em->flush();
         
         return $this->json(["done" => true]);
+    }
+    
+    
+    public function findTheGroup(ManagerRegistry $doctrine, $groupId){
+        $gRepo = $doctrine->getRepository(Group::class);
+        $group = $gRepo->findOneBy(['id' => $groupId]);
+        
+        if(empty($group )){
+            return [
+                "error" => true,
+                "error_message" => "Group not found.",
+            ];
+        }
+        
+        return $group;
     }
 }

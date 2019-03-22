@@ -124,7 +124,7 @@ class ApiUserController extends AbstractController
     }
     
     /**
-     * @Route("/api/users/{$userIdOrUsername}/groups/{groupId}/remove", name="api_remove_user_from_group", methods={"DELETE"})
+     * @Route("/api/users/{userIdOrUsername}/groups/{groupId}", name="api_remove_user_from_group", methods={"DELETE"})
      */
     public function removeUserFromGroup($userIdOrUsername, $groupId)
     {

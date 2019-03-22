@@ -1,7 +1,7 @@
 # User Management System
 
 
-This is a challenge project applied by [InterNations](https://www.internations.org) as requirement for the [Backend Engineer](https://www.internations.org/career/vacancy/personio-99085?source=stackoverflow) role.
+This is a challenge project, developed with Symfony Framework 4, applied by [InterNations](https://www.internations.org) as requirement for the [Backend Engineer](https://www.internations.org/career/vacancy/personio-99085?source=stackoverflow) role.
 
 ## Content
 *  [Docs and Diagrams](#docs-and-diagrams)

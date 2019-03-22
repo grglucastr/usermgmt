@@ -25,7 +25,7 @@ class User implements \JsonSerializable
     private $ugroups;
 
     /**
-     * @ORM\Column(type="string", length=80)
+     * @ORM\Column(type="string", unique=true, length=80)
      */
     private $username;
 
